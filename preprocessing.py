@@ -7,7 +7,7 @@ from sklearn.feature_selection import SelectKBest
 from sklearn.feature_selection import chi2
 
 
-def read_in_merged_data(path_to_data=''):
+def read_in_merged_data(path_to_tedtalks=''):
     """ Merge transcripts.csv with ted_main.csv
 
     # Arguments:
@@ -16,8 +16,8 @@ def read_in_merged_data(path_to_data=''):
     """
 
     # Read in the data
-    df_main = pd.read_csv(path_to_data + 'tedtalks/ted_main.csv')
-    df_transcripts = pd.read_csv(path_to_data + 'tedtalks/transcripts.csv')
+    df_main = pd.read_csv(path_to_tedtalks + 'tedtalks/ted_main.csv')
+    df_transcripts = pd.read_csv(path_to_tedtalks + 'tedtalks/transcripts.csv')
 
     # Merge data frames on `url`, since some ted talks in `ted_main.csv` do not have transcripts in `transcripts.csv`
     df_merged = df_main.merge(df_transcripts, how="inner", on="url")
