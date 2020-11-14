@@ -4,7 +4,7 @@ import tensorflow as tf
 import matplotlib.pyplot as plt
 from sklearn.metrics import accuracy_score, f1_score
 from preprocessing import read_in_merged_data, extract_label, train_val_test_split, encode_labels, vectorize_transcripts
-from evaluation import plot_confusion_matrix, plot_scores_graph
+from analysis_of_performance import plot_confusion_matrix, plot_scores_graph
 
 ###########################
 ## Conduct preprocessing ##
@@ -26,7 +26,7 @@ y_train, y_val, y_test, label_tokenizer = encode_labels(
     df_train, df_val, df_test)
 
 # Tokenize / vectorize transcripts using TF-IDF bag-of-words approach
-X_train, X_val, X_test = vectorize_transcripts(
+X_train, X_val, X_test, transcript_vectorizer, ngram_selector = vectorize_transcripts(
     df_train, df_val, df_test, y_train)
 
 ###########################
@@ -47,7 +47,6 @@ test_f1 = f1_score(y_test, preds_test, average='macro')
 print("-"*50)
 print(f"Final MLP test accuracy: {test_accuracy*100:.2f}%")
 print(f"Final MLP F1-score: {test_f1*100:.2f}%")
-print("-"*50)
 
 # Plot precision-recall-accuracy-f1 by label graph
 print("Plotting precision-recall-accuracy-f1 by label graph")
@@ -56,3 +55,4 @@ plot_scores_graph(mlp_final_model, X_test, y_test, label_tokenizer)
 # Output confusion matrix
 print("Plotting confusion matrix")
 plot_confusion_matrix(mlp_final_model, X_test, y_test, label_tokenizer)
+print("-"*50)
