@@ -13,6 +13,10 @@ def read_in_merged_data(path_to_tedtalks=''):
     # Arguments:
         path_to_data : str
             Specify the path to the `tedtalks` folder containing the data
+
+    # Returns:
+        df_merged : pd.DataFrame
+            A data frame containing the merged transcripts.csv and ted_main.csv files
     """
 
     # Read in the data
@@ -162,6 +166,11 @@ def vectorize_transcripts(df_train, df_val, df_test, y_train, top_k_features=200
     # Returns:
       X_train, X_val, X_test: scipy.sparse.csr.csr_matrix of shape (n_obs, top_k_features)
           Sparse matrices (to store efficiently) with the TF-IDF vectorized transcripts.
+      transcript_vectorizer: sklearn.feature_extraction.text import TfidfVectorizer
+          Based on training data, so can be used later to vectorize new data
+      ngram_selector: sklearn.feature_selection.SelectKBest  
+          Based on training data, so can be used later to select 
+          the same 20000 best n-grams for new data  
 
     # Raises:
       AssertionError : if "transcript" is not a column in `df_train`,
@@ -171,25 +180,25 @@ def vectorize_transcripts(df_train, df_val, df_test, y_train, top_k_features=200
                df_train, df_val, df_test])
 
     # Construct the TF-IDF vectorizer, considering both 1-grams and 2-grams as tokens
-    vectorizer = TfidfVectorizer(ngram_range=(
+    transcript_vectorizer = TfidfVectorizer(ngram_range=(
         1, 2), strip_accents='unicode', min_df=2)
 
     # Learn vocabulary from training transcripts and vectorize training transcripts
-    X_train = vectorizer.fit_transform(df_train["transcript"])
+    X_train = transcript_vectorizer.fit_transform(df_train["transcript"])
 
     # Vectorize validation and test transcripts
-    X_val = vectorizer.transform(df_val["transcript"])
-    X_test = vectorizer.transform(df_test["transcript"])
+    X_val = transcript_vectorizer.transform(df_val["transcript"])
+    X_test = transcript_vectorizer.transform(df_test["transcript"])
 
-    # Select the 'top_k_features' most important features in predicting the response,
+    # Select the 'top_k_features' most important n-grams in predicting the response,
     # using the chi-squared score as a measure of association between each
     # feature and the response in the training data.
-    selector = SelectKBest(chi2, k=min(top_k_features, X_train.shape[1]))
-    selector.fit(X_train, y_train)
+    ngram_selector = SelectKBest(chi2, k=min(top_k_features, X_train.shape[1]))
+    ngram_selector.fit(X_train, y_train)
 
     # Retain only the 'top_k_features' for each of the X matrices
-    X_train = selector.transform(X_train).astype('float32')
-    X_val = selector.transform(X_val).astype('float32')
-    X_test = selector.transform(X_test).astype('float32')
+    X_train = ngram_selector.transform(X_train).astype('float32')
+    X_val = ngram_selector.transform(X_val).astype('float32')
+    X_test = ngram_selector.transform(X_test).astype('float32')
 
-    return X_train, X_val, X_test
+    return X_train, X_val, X_test, transcript_vectorizer, ngram_selector

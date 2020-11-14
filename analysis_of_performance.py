@@ -12,36 +12,22 @@ rc('font', **{'family': 'serif', 'serif': ['Palatino']})
 
 
 def plot_confusion_matrix_inner(y_true, y_pred, classes,
-                                normalize=False,
                                 title=None,
                                 cmap=plt.cm.binary):
 
     np.set_printoptions(precision=2)
 
-    if not title:
-        if normalize:
-            title = 'Normalized confusion matrix'
-        else:
-            title = 'Confusion matrix, without normalization'
-
     # Compute confusion matrix
     cm = confusion_matrix(y_true, y_pred)
-    if normalize:
-        cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
-        # print("Normalized confusion matrix")
-    else:
-        pass
-        # print('Confusion matrix, without normalization')
-
-        # print(cm)
 
     fig, ax = plt.subplots(figsize=(7, 7))
     im = ax.imshow(cm, interpolation='nearest', cmap=cmap)
     ax.figure.colorbar(im, ax=ax)
-    # We want to show all ticks...
+
+    # Show all ticks
     ax.set(xticks=np.arange(cm.shape[1]),
            yticks=np.arange(cm.shape[0]),
-           # ... and label them with the respective list entries
+           # Label the ticks with the respective list entries
            xticklabels=classes, yticklabels=classes,
            title=title,
            ylabel='True label',
@@ -50,8 +36,9 @@ def plot_confusion_matrix_inner(y_true, y_pred, classes,
     # Rotate the tick labels and set their alignment.
     plt.setp(ax.get_xticklabels(), rotation=45, ha="right",
              rotation_mode="anchor")
+
     # Loop over data dimensions and create text annotations.
-    fmt = '.2f' if normalize else 'd'
+    fmt = 'd'
     thresh = cm.max() / 2.
     for i in range(cm.shape[0]):
         for j in range(cm.shape[1]):
@@ -59,10 +46,11 @@ def plot_confusion_matrix_inner(y_true, y_pred, classes,
                     ha="center", va="center",
                     color="white" if cm[i, j] > thresh else "black")
     fig.tight_layout()
+
     return ax
 
 
-def plot_confusion_matrix(model, X, y, label_tokenizer, normalize=False, title="Confusion Matrix on Test Set"):
+def plot_confusion_matrix(model, X, y, label_tokenizer, title="Confusion Matrix on Test Set"):
     y_pred = np.argmax(model.predict(X), axis=-1)
     y_true = y  # np.argmax(y, axis=1)
 
@@ -71,8 +59,7 @@ def plot_confusion_matrix(model, X, y, label_tokenizer, normalize=False, title="
     class_names = ["Other" if name == "other" else name.upper()
                    for name in class_names]
 
-    # Plotting normalized confusion matrix
-    plot_confusion_matrix_inner(y_true, y_pred, classes=class_names, normalize=normalize,
+    plot_confusion_matrix_inner(y_true, y_pred, classes=class_names,
                                 title=title, cmap=plt.cm.binary)
     plt.show()
 
