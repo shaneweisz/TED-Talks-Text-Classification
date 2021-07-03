@@ -36,7 +36,7 @@ X_train, X_val, X_test, transcript_vectorizer, ngram_selector = vectorize_transc
 print("Producing final MLP results... ")
 
 # Load the best MLP model (with the highest validation F1-score)
-mlp_final_model = tf.keras.models.load_model("mlp_final_model")
+mlp_final_model = tf.keras.models.load_model("../final_mlp_model")
 
 # Predict using this model on the test data
 preds_test = np.argmax(mlp_final_model.predict(X_test), axis=1)
